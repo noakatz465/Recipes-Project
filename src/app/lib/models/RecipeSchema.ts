@@ -9,7 +9,7 @@ const RecipeSchema: Schema<IRecipe> = new Schema({
   instructions: { type: String, required: true },
   isFavorite: { type: Boolean, default: false }, // שדה חדש - האם מועדף
   ingredients: { type: [String], required: true }, // שדה חדש - רשימת מרכיבים
-}, { timestamps: true }); // אפשר להוסיף את התו `timestamps` כדי לעקוב אחרי זמן יצירת המתכון
+}, { timestamps: true }); 
 
 const Recipe: Model<IRecipe> = mongoose.models.Recipe || mongoose.model<IRecipe>('Recipe', RecipeSchema);
 

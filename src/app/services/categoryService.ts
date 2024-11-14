@@ -10,18 +10,5 @@ export const getAllCategories = async () => {
     throw error;
   }
 };
-export const addRecipe = async (newRecipeData: {
-    categoryId: string;
-    description: string;
-    mealName: string;
-    img: string;
-    instructions: string;
-  }) => {
-    try {
-      const response = await axios.post(`${API_URL}/post`, newRecipeData); 
-      return response.data; 
-    } catch (error) {
-      console.error('Error adding recipe:', error);
-      throw error; 
-    }
-  };
+
+  
