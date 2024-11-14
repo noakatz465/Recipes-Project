@@ -7,4 +7,6 @@ export interface IRecipe {
   mealName: string;
   img: string;
   instructions: string;
+  isFavorite: boolean; // שדה חדש - האם מועדף
+  ingredients: string[]; // שדה חדש - רשימת מרכיבים
 }

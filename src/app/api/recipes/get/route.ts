@@ -17,6 +17,8 @@ export async function GET(req: Request) {
         mealName: recipe.mealName,
         img: recipe.img,
         instructions: recipe.instructions,
+        isFavorite: recipe.isFavorite,  
+        ingredients: recipe.ingredients, 
       })),
     });
   } catch (error) {

@@ -7,7 +7,10 @@ export async function POST(req: Request) {
   try {
     await connect();
 
-    const { categoryId, description, mealName, img, instructions } = await req.json(); // מקבלים את הנתונים החדשים מהבקשה
+    const data = await req.json();
+    console.log(data); // לבדוק מה מועבר בבקשה
+
+    const { categoryId, description, mealName, img, instructions, isFavorite, ingredients } = data;
 
     const newRecipe = new Recipe({
       categoryId,
@@ -15,6 +18,8 @@ export async function POST(req: Request) {
       mealName,
       img,
       instructions,
+      isFavorite,
+      ingredients,
     });
 
     await newRecipe.save(); // שומרים את המתכון החדש במסד הנתונים
@@ -28,6 +33,8 @@ export async function POST(req: Request) {
         mealName: newRecipe.mealName,
         img: newRecipe.img,
         instructions: newRecipe.instructions,
+        isFavorite: newRecipe.isFavorite,
+        ingredients: newRecipe.ingredients,
       },
     });
   } catch (error) {
@@ -35,3 +42,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: 'Error adding recipe', error: error }, { status: 500 });
   }
 }
+
