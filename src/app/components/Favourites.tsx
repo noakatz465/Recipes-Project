@@ -4,17 +4,13 @@ import Recipe from './Recipe';
 import useRecipeStore from '../stores/recipeStore';
 
 function Favourites() {
-  const { favoriteRecipes, loading, error, fetchData } = useRecipeStore();
+  const { favoriteRecipes, error, fetchData } = useRecipeStore();
 
   useEffect(() => {
     if (favoriteRecipes.length === 0) {
       fetchData(); // Fetch data if favorite recipes are not loaded
     }
   }, [fetchData, favoriteRecipes.length]);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   if (error) {
     return <div>{error}</div>;
