@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation'; // Import useRouter
+import { useRouter } from 'next/navigation';
 import RecipeModel from '@/app/models/recipeModel';
 import { getRecipeById } from '@/app/services/recipesService';
 
 interface RecipeViewProps {
-  recipeId: string;
+  recipeId: string; // Do not modify this
   onClose?: () => void; // Optional function to close the dialog
 }
 
@@ -37,17 +37,24 @@ const RecipeView: React.FC<RecipeViewProps> = ({ recipeId }) => {
 
   return (
     <div className="fixed inset-0 bg-gray-700 bg-opacity-50 flex justify-center items-center z-50">
+      {/* Dialog Container */}
       <div
-        className="bg-white rounded-2xl shadow-lg max-w-4xl w-full p-6 relative overflow-y-auto max-h-[90vh]">
+        className="bg-white rounded-2xl shadow-lg max-w-4xl w-full p-6 relative overflow-y-auto max-h-[90vh]"
+      >
+        {/* Close Button Positioned Relatively to the Dialog */}
         <button
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl"
-          onClick={handleClose}>
+          onClick={handleClose}
+        >
           &times;
         </button>
+
+        {/* Recipe Details */}
         <img
           className="w-full h-64 object-cover rounded-md mb-4"
           src={recipe.img}
-          alt={recipe.mealName} />
+          alt={recipe.mealName}
+        />
         <h1 className="text-3xl font-bold mb-2">{recipe.mealName}</h1>
         <p className="text-gray-500 text-sm mb-4">{recipe.categoryName || 'Unknown Category'}</p>
         <p className="text-gray-700 text-lg mb-4">{recipe.description}</p>
@@ -60,7 +67,7 @@ const RecipeView: React.FC<RecipeViewProps> = ({ recipeId }) => {
           ))}
         </ul>
         <h2 className="text-2xl font-semibold mb-2">Instructions:</h2>
-        <p className="text-gray-700">{recipe.instructions}</p>
+        <p className="text-gray-700 whitespace-pre-line">{recipe.instructions}</p>
       </div>
     </div>
   );
