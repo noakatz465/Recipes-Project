@@ -23,6 +23,17 @@ export const getRecipesByCategory = async (categoryId: string) => {
   }
 };
 
+//פונקציה לקבלת כל המתכונים המועדפים
+export const getFavoriteRecipes = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/get/getAllFavourites`);
+    return response.data.recipes;
+  } catch (error) {
+    console.error('Error fetching favorite recipes:', error);
+    throw error;
+  }
+};
+
 // פונקציה להוספת מתכון חדש
 export const addRecipe = async (newRecipeData: {
   categoryId: string;
