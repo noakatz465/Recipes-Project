@@ -3,41 +3,52 @@ import React, { useEffect, useState } from 'react';
 import { recipeSchema } from '../zod/recipeSchema';
 import { addRecipe } from '../services/recipesService';
 import useRecipeStore from '../stores/recipeStore';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
 
 function AddRecipe() {
   const [categoryId, setCategoryId] = useState('');
-  const [categoryName, setCategoryName] = useState('');
   const [description, setDescription] = useState('');
   const [mealName, setMealName] = useState('');
   const [img, setImg] = useState('');
   const [instructions, setInstructions] = useState('');
   const [ingredients, setIngredients] = useState<string[]>([]);
+  const [newIngredient, setNewIngredient] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
-
+  const router = useRouter(); 
   // קריאה לסטור כדי לקבל את הקטגוריות
   const { categories, error, fetchData } = useRecipeStore();
-
   // קריאה ל-fetchData פעם אחת כשהרכיב נטען
   useEffect(() => {
     fetchData();
   }, [fetchData]); // תוודא ש-fetchData יופעל רק פעם אחת
 
-
   const handleSubmit = async (e: React.FormEvent) => {
-    
     e.preventDefault();
 
     try {
       const newRecipeData = {
-        categoryId, categoryName, description, mealName, img, instructions, isFavorite, ingredients,
+        categoryId,
+        description,
+        mealName,
+        img,
+        instructions,
+        isFavorite,
+        ingredients,
       };
-      console.log(newRecipeData);
-      recipeSchema.parse(newRecipeData);
 
+      recipeSchema.parse(newRecipeData);
       await addRecipe(newRecipeData);
-      alert('Recipe added successfully!');
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  const handleAddIngredient = () => {
+    if (newIngredient.trim() !== '') {
+      setIngredients((prev) => [...prev, newIngredient.trim()]);
+      setNewIngredient('');
     }
   };
 
@@ -82,7 +93,7 @@ function AddRecipe() {
         <div>
           <label className="block text-sm font-medium text-gray-700">Image URL</label>
           <input
-            type="url"
+            type="text"
             className="w-full mt-1 p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500"
             placeholder="Image URL"
             value={img}
@@ -101,17 +112,51 @@ function AddRecipe() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Ingredients</label>
-          <input
-            type="text"
-            className="w-full mt-1 p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500"
-            placeholder="Ingredients (comma-separated)"
-            value={ingredients.join(', ')}
-            onChange={(e) =>
-              setIngredients(e.target.value.split(',').map((ingredient) => ingredient.trim()))
-            }
-          />
-        </div>
+  <label className="block text-sm font-medium text-gray-700">Ingredients</label>
+  <div className="flex items-center gap-2">
+    <input
+      type="text"
+      className="flex-grow mt-1 p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500"
+      placeholder="Ingredient"
+      value={newIngredient}
+      onChange={(e) => setNewIngredient(e.target.value)}
+    />
+    <button
+      type="button"
+      onClick={handleAddIngredient}
+      className="bg-purple-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-purple-600"
+    >
+      +
+    </button>
+  </div>
+  <ul className="mt-2 space-y-1">
+    {ingredients.map((ingredient, index) => (
+      <li key={index} className="flex items-center gap-2">
+        <input
+          type="text"
+          value={ingredient}
+          className="flex-grow p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500"
+          onChange={(e) => {
+            const updatedIngredients = [...ingredients];
+            updatedIngredients[index] = e.target.value;
+            setIngredients(updatedIngredients);
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => {
+            const updatedIngredients = ingredients.filter((_, i) => i !== index);
+            setIngredients(updatedIngredients);
+          }}
+          className="bg-red-500 text-white px-2 py-1 rounded-lg shadow-md hover:bg-red-600"
+        >
+          X
+        </button>
+      </li>
+    ))}
+  </ul>
+</div>
+
 
         <div className="flex items-center space-x-2">
           <input
@@ -125,10 +170,13 @@ function AddRecipe() {
 
         <button
           type="submit"
-          className="w-full bg-purple-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-purple-600 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-        >
+          className="w-full bg-purple-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-purple-600 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 mt-4 block text-center"
+          onClick={() => router.push('/pages/recipeList')}>
           Add Recipe
         </button>
+
+
+
       </form>
 
       {error && <p className="text-red-500 mt-4">{error}</p>}
