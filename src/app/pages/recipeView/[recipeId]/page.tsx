@@ -1,18 +1,27 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import RecipeView from '@/app/components/RecipeView';
 
-function page() {
-  const params = useParams(); // Get all params
-  const { recipeId } = params || {}; // Extract 'id'
+const RecipePage: React.FC = () => {
+  const { recipeId } = useParams();
+  const [isDialogOpen, setIsDialogOpen] = useState(true);
 
   if (!recipeId || typeof recipeId !== 'string') {
     return <div className="text-center text-gray-500">Invalid recipe ID</div>;
   }
 
-  return <RecipeView recipeId={recipeId} />;
-}
+  return (
+    <>
+      {isDialogOpen && (
+        <RecipeView
+          recipeId={recipeId}
+          onClose={() => setIsDialogOpen(false)} 
+        />
+      )}
+    </>
+  );
+};
 
-export default page;
+export default RecipePage;
