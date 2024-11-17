@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { recipeSchema } from '../zod/recipeSchema';
 import { addRecipe } from '../services/recipesService';
 import useRecipeStore from '../stores/recipeStore';
-import Link from 'next/link';
+import RecipeModel from '../models/recipeModel'; // Import the RecipeModel
+import { ZodError } from 'zod';
 import { useRouter } from 'next/navigation';
-
 
 function AddRecipe() {
   const [categoryId, setCategoryId] = useState('');
@@ -16,19 +16,21 @@ function AddRecipe() {
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [newIngredient, setNewIngredient] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
-  const router = useRouter(); 
-  // קריאה לסטור כדי לקבל את הקטגוריות
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const router = useRouter();
+
   const { categories, error, fetchData } = useRecipeStore();
-  // קריאה ל-fetchData פעם אחת כשהרכיב נטען
+
   useEffect(() => {
     fetchData();
-  }, [fetchData]); // תוודא ש-fetchData יופעל רק פעם אחת
+  }, [fetchData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({}); // Reset errors before validation
 
     try {
-      const newRecipeData = {
+      const newRecipeData = new RecipeModel({
         categoryId,
         description,
         mealName,
@@ -36,12 +38,27 @@ function AddRecipe() {
         instructions,
         isFavorite,
         ingredients,
-      };
+      });
 
+      // Validate the data using Zod
       recipeSchema.parse(newRecipeData);
+
+      // Submit the recipe if validation passes
       await addRecipe(newRecipeData);
+      router.push('/pages/recipeList');
     } catch (err) {
-      console.log(err);
+      if (err instanceof ZodError) {
+        // Map Zod errors to the errors state
+        const fieldErrors: Record<string, string> = {};
+        err.errors.forEach((error) => {
+          if (error.path.length > 0) {
+            fieldErrors[error.path[0]] = error.message;
+          }
+        });
+        setErrors(fieldErrors);
+      } else {
+        console.log(err);
+      }
     }
   };
 
@@ -65,7 +82,9 @@ function AddRecipe() {
             value={mealName}
             onChange={(e) => setMealName(e.target.value)}
           />
+          {errors.mealName && <p className="text-red-500 text-sm mt-1">{errors.mealName}</p>}
         </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700">Category</label>
           <select
@@ -80,7 +99,9 @@ function AddRecipe() {
               </option>
             ))}
           </select>
+          {errors.categoryId && <p className="text-red-500 text-sm mt-1">{errors.categoryId}</p>}
         </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700">Description</label>
           <textarea
@@ -89,7 +110,9 @@ function AddRecipe() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           ></textarea>
+          {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
         </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700">Image URL</label>
           <input
@@ -109,54 +132,55 @@ function AddRecipe() {
             value={instructions}
             onChange={(e) => setInstructions(e.target.value)}
           ></textarea>
+          {errors.instructions && <p className="text-red-500 text-sm mt-1">{errors.instructions}</p>}
         </div>
 
         <div>
-  <label className="block text-sm font-medium text-gray-700">Ingredients</label>
-  <div className="flex items-center gap-2">
-    <input
-      type="text"
-      className="flex-grow mt-1 p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500"
-      placeholder="Ingredient"
-      value={newIngredient}
-      onChange={(e) => setNewIngredient(e.target.value)}
-    />
-    <button
-      type="button"
-      onClick={handleAddIngredient}
-      className="bg-purple-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-purple-600"
-    >
-      +
-    </button>
-  </div>
-  <ul className="mt-2 space-y-1">
-    {ingredients.map((ingredient, index) => (
-      <li key={index} className="flex items-center gap-2">
-        <input
-          type="text"
-          value={ingredient}
-          className="flex-grow p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500"
-          onChange={(e) => {
-            const updatedIngredients = [...ingredients];
-            updatedIngredients[index] = e.target.value;
-            setIngredients(updatedIngredients);
-          }}
-        />
-        <button
-          type="button"
-          onClick={() => {
-            const updatedIngredients = ingredients.filter((_, i) => i !== index);
-            setIngredients(updatedIngredients);
-          }}
-          className="bg-red-500 text-white px-2 py-1 rounded-lg shadow-md hover:bg-red-600"
-        >
-          X
-        </button>
-      </li>
-    ))}
-  </ul>
-</div>
-
+          <label className="block text-sm font-medium text-gray-700">Ingredients</label>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              className="flex-grow mt-1 p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500"
+              placeholder="Ingredient"
+              value={newIngredient}
+              onChange={(e) => setNewIngredient(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={handleAddIngredient}
+              className="bg-purple-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-purple-600"
+            >
+              +
+            </button>
+          </div>
+          <ul className="mt-2 space-y-1">
+            {ingredients.map((ingredient, index) => (
+              <li key={index} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={ingredient}
+                  className="flex-grow p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500"
+                  onChange={(e) => {
+                    const updatedIngredients = [...ingredients];
+                    updatedIngredients[index] = e.target.value;
+                    setIngredients(updatedIngredients);
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const updatedIngredients = ingredients.filter((_, i) => i !== index);
+                    setIngredients(updatedIngredients);
+                  }}
+                  className="bg-red-500 text-white px-2 py-1 rounded-lg shadow-md hover:bg-red-600"
+                >
+                  X
+                </button>
+              </li>
+            ))}
+          </ul>
+          {errors.ingredients && <p className="text-red-500 text-sm mt-1">{errors.ingredients}</p>}
+        </div>
 
         <div className="flex items-center space-x-2">
           <input
@@ -171,12 +195,9 @@ function AddRecipe() {
         <button
           type="submit"
           className="w-full bg-purple-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-purple-600 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 mt-4 block text-center"
-          onClick={() => router.push('/pages/recipeList')}>
+        >
           Add Recipe
         </button>
-
-
-
       </form>
 
       {error && <p className="text-red-500 mt-4">{error}</p>}
