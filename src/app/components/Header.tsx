@@ -115,9 +115,9 @@ function Header() {
         </div>
 
         {/* Add Recipe Button */}
-        <button className="bg-purple-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-600">
+        <Link href={"/pages/addRecipe"} className="bg-purple-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-600">
           Add Recipe
-        </button>
+        </Link>
       </div>
     </div>
   );

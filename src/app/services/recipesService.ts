@@ -23,6 +23,15 @@ export const getRecipesByCategory = async (categoryId: string) => {
   }
 };
 
+//פונקציה לקבלת כל המתכונים המועדפים
+export const getFavoriteRecipes = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/get/getAllFavourites`);
+    return response.data.recipes;
+  } catch (error) {
+    console.error('Error fetching favorite recipes:', error);
+  }
+}
 // פונקציה לקבלת מתכון לפי ID
 export const getRecipeById = async (recipeId: string) => {
   try {
@@ -42,8 +51,8 @@ export const addRecipe = async (newRecipeData: {
   mealName: string;
   img: string;
   instructions: string;
-  isFavorite?: boolean; // שדה אופציונלי - האם מועדף
-  ingredients: string[]; // שדה חדש - רשימת מרכיבים
+  isFavorite?: boolean;
+  ingredients: string[];
 }) => {
   try {
     const response = await axios.post(`${API_URL}/post`, newRecipeData);
