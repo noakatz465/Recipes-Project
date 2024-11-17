@@ -30,6 +30,16 @@ export const getFavoriteRecipes = async () => {
     return response.data.recipes;
   } catch (error) {
     console.error('Error fetching favorite recipes:', error);
+  }
+}
+// פונקציה לקבלת מתכון לפי ID
+export const getRecipeById = async (recipeId: string) => {
+  try {
+    const response = await axios.get(`${API_URL}/get/recipeId/${recipeId}`);
+    console.log(response.data.recipe)
+    return response.data.recipe; // Return the single recipe object
+  } catch (error) {
+    console.error('Error fetching recipe by ID:', error);
     throw error;
   }
 };
