@@ -1,4 +1,5 @@
 import axios from 'axios';
+import RecipeModel from '../models/recipeModel';
 const API_URL = 'http://localhost:3000/api/recipes';
 
 // פונקציה לקבלת כל המתכונים
@@ -45,17 +46,9 @@ export const getRecipeById = async (recipeId: string) => {
 };
 
 // פונקציה להוספת מתכון חדש
-export const addRecipe = async (newRecipeData: {
-  categoryId: string;
-  description: string;
-  mealName: string;
-  img: string;
-  instructions: string;
-  isFavorite?: boolean;
-  ingredients: string[];
-}) => {
+export const addRecipe = async (recipe: RecipeModel) => {
   try {
-    const response = await axios.post(`${API_URL}/post`, newRecipeData);
+    const response = await axios.post(`${API_URL}/post`, recipe);
     return response.data;
   } catch (error) {
     console.error('Error adding recipe:', error);
@@ -63,23 +56,17 @@ export const addRecipe = async (newRecipeData: {
   }
 };
 
+
 // פונקציה לעדכון מתכון קיים
-export const updateRecipe = async (
-  recipeId: string,
-  updatedData: {
-    description: string;
-    mealName: string;
-    img: string;
-    instructions: string;
-    isFavorite?: boolean; // שדה אופציונלי - עדכון האם מועדף
-    ingredients?: string[]; // שדה אופציונלי - עדכון רשימת מרכיבים
-  }
-) => {
+export const updateRecipe = async (recipe: RecipeModel) => {
   try {
-    const response = await axios.put(`${API_URL}/update/${recipeId}`, updatedData);
+    console.log(recipe)
+
+    const response = await axios.put(`${API_URL}/put/${recipe._id}`, recipe);
     return response.data.updatedRecipe;
   } catch (error) {
     console.error('Error updating recipe:', error);
     throw error;
   }
 };
+
