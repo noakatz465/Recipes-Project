@@ -3,7 +3,6 @@ import RecipeModel from '../models/recipeModel';
 import { CategoryModel } from '../models/categoryModel';
 import { getAllCategories } from '../services/categoryService';
 import { getAllRecipes, updateRecipe } from '../services/recipesService';
-
 interface RecipeStore {
   recipes: RecipeModel[];
   filteredRecipes: RecipeModel[]; // מתכונים מסוננים
@@ -12,9 +11,11 @@ interface RecipeStore {
   favoriteRecipes: RecipeModel[];
   loading: boolean;
   error: string | null;
+  searchTerm: string; // Add searchTerm property
   fetchData: () => Promise<void>;
   toggleFavorite: (recipe: RecipeModel) => Promise<void>;
   toggleCategoryFilter: (categoryId: string) => void; // סינון לפי קטגוריות
+  filterRecipesBySearch: (searchTerm: string) => void; // סינון לפי חיפוש
 }
 
 const useRecipeStore = create<RecipeStore>((set, get) => ({
@@ -25,6 +26,7 @@ const useRecipeStore = create<RecipeStore>((set, get) => ({
   favoriteRecipes: [],
   loading: true,
   error: null,
+  searchTerm: '', // Initialize searchTerm with an empty string
 
   fetchData: async () => {
     try {
@@ -50,7 +52,7 @@ const useRecipeStore = create<RecipeStore>((set, get) => ({
 
       set({
         recipes: recipeObjects,
-        filteredRecipes: recipeObjects, // בהתחלה כל המתכונים מוצגים
+        filteredRecipes: recipeObjects, // Initially show all recipes
         categories: categoryObjects,
         favoriteRecipes,
         loading: false,
@@ -84,7 +86,7 @@ const useRecipeStore = create<RecipeStore>((set, get) => ({
           get().selectedCategories.length > 0
             ? get().selectedCategories.includes(recipe.categoryId)
             : true
-        ), // עדכון סינון לפי הקטגוריות שנבחרו
+        ), // Update filtering based on selected categories
         favoriteRecipes: updatedFavorites,
       });
     } catch (error) {
@@ -94,20 +96,34 @@ const useRecipeStore = create<RecipeStore>((set, get) => ({
   },
 
   toggleCategoryFilter: (categoryId: string) => {
-    const { selectedCategories, recipes } = get();
+    const { selectedCategories, recipes, searchTerm } = get();
 
-    // עדכון קטגוריות נבחרות
+    // Update selected categories
     const updatedCategories = selectedCategories.includes(categoryId)
       ? selectedCategories.filter((id) => id !== categoryId)
       : [...selectedCategories, categoryId];
 
-    // עדכון רשימת מתכונים מסוננים
-    const filteredRecipes =
-      updatedCategories.length > 0
-        ? recipes.filter((recipe) => updatedCategories.includes(recipe.categoryId))
-        : recipes; // אם אין קטגוריות נבחרות, הצג הכל
+    // Update filtered recipes based on search term and selected categories
+    const filtered = recipes.filter(
+      (recipe) =>
+        (updatedCategories.length === 0 || updatedCategories.includes(recipe.categoryId)) &&
+        recipe.mealName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-    set({ selectedCategories: updatedCategories, filteredRecipes });
+    set({ selectedCategories: updatedCategories, filteredRecipes: filtered });
+  },
+
+  filterRecipesBySearch: (searchTerm: string) => {
+    const { recipes, selectedCategories } = get();
+
+    // Update filtered recipes based on search term and selected categories
+    const filtered = recipes.filter(
+      (recipe) =>
+        recipe.mealName.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (selectedCategories.length === 0 || selectedCategories.includes(recipe.categoryId))
+    );
+
+    set({ searchTerm, filteredRecipes: filtered });
   },
 }));
 

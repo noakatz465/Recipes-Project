@@ -12,7 +12,7 @@ function Header() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Get the store actions and state
-  const { selectedCategories, toggleCategoryFilter } = useRecipeStore();
+  const { selectedCategories, toggleCategoryFilter, filterRecipesBySearch } = useRecipeStore();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -34,6 +34,12 @@ function Header() {
     toggleCategoryFilter(categoryId); // Call the toggleCategoryFilter from the store
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const term = e.target.value;
+    setSearchTerm(term); // Update local search state
+    filterRecipesBySearch(term); // Update filtered recipes in the store
+  };
+
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
@@ -52,13 +58,7 @@ function Header() {
           </button>
           {isDropdownOpen && (
             <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-300 rounded-md shadow-lg z-10">
-              <input
-                type="text"
-                placeholder="Search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 border-b border-gray-300 text-sm focus:outline-none"
-              />
+              
               <div className="py-2 max-h-48 overflow-y-auto">
                 {categories
                   .filter((category) =>
@@ -73,7 +73,7 @@ function Header() {
                         type="checkbox"
                         id={`category-${category._id}`}
                         checked={selectedCategories.includes(category._id)}
-                        onChange={() => handleCategoryChange(category._id)} // Trigger the store action
+                        onChange={() => handleCategoryChange(category._id)} 
                         className="mr-2"
                       />
                       <label
@@ -94,6 +94,8 @@ function Header() {
           <input
             type="text"
             placeholder="Search"
+            value={searchTerm} // Controlled input
+            onChange={handleSearchChange} // Call search handler on change
             className="px-4 py-2 text-sm text-gray-800 focus:outline-none"
           />
           <button className="bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200">
