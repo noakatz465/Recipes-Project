@@ -2,16 +2,15 @@
 
 import React, { useEffect } from 'react';
 import Recipe from './Recipe'; // Import the Recipe component
-import { RecipeModel } from '../models/recipeModel';
 import useRecipeStore from '../stores/recipeStore';
+import RecipeModel from '../models/recipeModel';
 
 function RecipeList() {
-  const { recipes, error, fetchData } = useRecipeStore();
+  const { filteredRecipes, error, fetchData } = useRecipeStore();
 
   useEffect(() => {
     fetchData(); // Fetch data when component mounts
   }, [fetchData]);
-
 
   if (error) {
     return <div>{error}</div>;
@@ -19,9 +18,9 @@ function RecipeList() {
 
   return (
     <div className="recipe-list p-4">
-      <h1 className="text-2xl font-bold mb-6">All recipes</h1>
+      {/* <h1 className="text-2xl font-bold mb-6">Filtered Recipes</h1> */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {recipes.map((recipe: RecipeModel) => {
+        {filteredRecipes.map((recipe: RecipeModel) => {
           return <Recipe key={recipe._id} recipe={recipe} />;
         })}
       </div>

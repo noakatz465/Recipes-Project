@@ -1,15 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getAllCategories } from '../services/categoryService';
 import { CategoryModel } from '../models/categoryModel';
+import useRecipeStore from '../stores/recipeStore'; // Import the store
 
 function Header() {
   const [categories, setCategories] = useState<CategoryModel[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Dropdown visibility state
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Get the store actions and state
+  const { selectedCategories, toggleCategoryFilter } = useRecipeStore();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -28,13 +31,7 @@ function Header() {
   }, []);
 
   const handleCategoryChange = (categoryId: string) => {
-    setSelectedCategories((prevSelectedCategories) => {
-      if (prevSelectedCategories.includes(categoryId)) {
-        return prevSelectedCategories.filter((id) => id !== categoryId);
-      } else {
-        return [...prevSelectedCategories, categoryId];
-      }
-    });
+    toggleCategoryFilter(categoryId); // Call the toggleCategoryFilter from the store
   };
 
   const toggleDropdown = () => {
@@ -53,7 +50,7 @@ function Header() {
           >
             Pick a Category
           </button>
-          {isDropdownOpen && ( // Conditionally render the dropdown
+          {isDropdownOpen && (
             <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-300 rounded-md shadow-lg z-10">
               <input
                 type="text"
@@ -76,7 +73,7 @@ function Header() {
                         type="checkbox"
                         id={`category-${category._id}`}
                         checked={selectedCategories.includes(category._id)}
-                        onChange={() => handleCategoryChange(category._id)}
+                        onChange={() => handleCategoryChange(category._id)} // Trigger the store action
                         className="mr-2"
                       />
                       <label
@@ -110,7 +107,7 @@ function Header() {
             All Recipes
           </Link>
           <Link href="/pages/favourites" className="text-gray-800 hover:text-purple-500 font-medium">
-            Favorites
+            Favourites
           </Link>
         </div>
 

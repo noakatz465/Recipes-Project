@@ -6,17 +6,22 @@ import { getAllRecipes, updateRecipe } from '../services/recipesService';
 
 interface RecipeStore {
   recipes: RecipeModel[];
+  filteredRecipes: RecipeModel[]; // מתכונים מסוננים
   categories: CategoryModel[];
+  selectedCategories: string[]; // קטגוריות נבחרות
   favoriteRecipes: RecipeModel[];
   loading: boolean;
   error: string | null;
   fetchData: () => Promise<void>;
-  toggleFavorite: (recipe: RecipeModel) => Promise<void>; // פונקציה לעדכון מועדף
+  toggleFavorite: (recipe: RecipeModel) => Promise<void>;
+  toggleCategoryFilter: (categoryId: string) => void; // סינון לפי קטגוריות
 }
 
 const useRecipeStore = create<RecipeStore>((set, get) => ({
   recipes: [],
+  filteredRecipes: [],
   categories: [],
+  selectedCategories: [],
   favoriteRecipes: [],
   loading: true,
   error: null,
@@ -43,37 +48,66 @@ const useRecipeStore = create<RecipeStore>((set, get) => ({
 
       const favoriteRecipes = recipeObjects.filter((recipe: { isFavorite: any }) => recipe.isFavorite);
 
-      set({ recipes: recipeObjects, categories: categoryObjects, favoriteRecipes: favoriteRecipes, loading: false });
+      set({
+        recipes: recipeObjects,
+        filteredRecipes: recipeObjects, // בהתחלה כל המתכונים מוצגים
+        categories: categoryObjects,
+        favoriteRecipes,
+        loading: false,
+      });
     } catch (error) {
       console.error(error);
       set({ error: 'Failed to fetch data', loading: false });
     }
   },
 
-  // פונקציה לעדכון מצב מועדף על ידי שליחת אובייקט המתכון
   toggleFavorite: async (recipe: RecipeModel) => {
-    const { recipes } = get(); // קבל את המתכונים הנוכחיים
+    const { recipes } = get();
     try {
-      // הפוך את המצב של isFavorite
       const updatedRecipe = {
         ...recipe,
         isFavorite: !recipe.isFavorite,
       };
 
-      // עדכן בשרת
+      // Update on the server
       await updateRecipe(updatedRecipe);
 
-      // עדכן בחנות
+      // Update in the store
       const updatedRecipes = recipes.map((r) =>
         r._id === recipe._id ? updatedRecipe : r
       );
       const updatedFavorites = updatedRecipes.filter((r) => r.isFavorite);
 
-      set({ recipes: updatedRecipes, favoriteRecipes: updatedFavorites });
+      set({
+        recipes: updatedRecipes,
+        filteredRecipes: updatedRecipes.filter((recipe) =>
+          get().selectedCategories.length > 0
+            ? get().selectedCategories.includes(recipe.categoryId)
+            : true
+        ), // עדכון סינון לפי הקטגוריות שנבחרו
+        favoriteRecipes: updatedFavorites,
+      });
     } catch (error) {
       console.error('Error toggling favorite status:', error);
       set({ error: 'Failed to update favorite status' });
     }
+  },
+
+  toggleCategoryFilter: (categoryId: string) => {
+    const { selectedCategories, recipes } = get();
+
+    // עדכון קטגוריות נבחרות
+    const updatedCategories = selectedCategories.includes(categoryId)
+      ? selectedCategories.filter((id) => id !== categoryId)
+      : [...selectedCategories, categoryId];
+
+    // עדכון רשימת מתכונים מסוננים
+    const filteredRecipes =
+      updatedCategories.length > 0
+        ? recipes.filter((recipe) => updatedCategories.includes(recipe.categoryId))
+        : recipes; // אם אין קטגוריות נבחרות, הצג הכל
+
+    set({ selectedCategories: updatedCategories, filteredRecipes });
   },
 }));
 
