@@ -51,8 +51,8 @@ export const addRecipe = async (newRecipeData: {
   mealName: string;
   img: string;
   instructions: string;
-  isFavorite?: boolean; // שדה אופציונלי - האם מועדף
-  ingredients: string[]; // שדה חדש - רשימת מרכיבים
+  isFavorite?: boolean;
+  ingredients: string[];
 }) => {
   try {
     const response = await axios.post(`${API_URL}/post`, newRecipeData);
