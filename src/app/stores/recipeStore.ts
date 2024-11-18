@@ -129,8 +129,13 @@ const useRecipeStore = create<RecipeStore>((set, get) => ({
     });
 
   },
-  resetFilters(){
-      
+  resetFilters: () => {
+    const { recipes } = get();
+    set({
+      selectedCategories: [],
+      searchTerm: '',
+      filteredRecipes: recipes,
+    });
   }
 }));
 
