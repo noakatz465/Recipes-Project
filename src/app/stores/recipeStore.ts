@@ -3,19 +3,20 @@ import RecipeModel from '../models/recipeModel';
 import { CategoryModel } from '../models/categoryModel';
 import { getAllCategories } from '../services/categoryService';
 import { getAllRecipes, updateRecipe } from '../services/recipesService';
+
 interface RecipeStore {
-  recipes: RecipeModel[];
+  recipes: RecipeModel[]; // רשימת כל המתכונים
   filteredRecipes: RecipeModel[]; // מתכונים מסוננים
-  categories: CategoryModel[];
-  selectedCategories: string[]; // קטגוריות נבחרות
-  favoriteRecipes: RecipeModel[];
-  loading: boolean;
-  error: string | null;
-  searchTerm: string; // Add searchTerm property
-  fetchData: () => Promise<void>;
-  toggleFavorite: (recipe: RecipeModel) => Promise<void>;
-  toggleCategoryFilter: (categoryId: string) => void; // סינון לפי קטגוריות
-  filterRecipesBySearch: (searchTerm: string) => void; // סינון לפי חיפוש
+  categories: CategoryModel[]; // קטגוריות מתכונים
+  selectedCategories: string[]; // קטגוריות שנבחרו לסינון
+  favoriteRecipes: RecipeModel[]; // מתכונים מועדפים
+  loading: boolean; // מצב טעינה
+  error: string | null; // הודעת שגיאה (אם יש)
+  searchTerm: string; // מונח חיפוש (חיפוש לפי שם מתכון)
+  fetchData: () => Promise<void>; // פונקציה לשליפת נתונים
+  toggleFavorite: (recipe: RecipeModel) => Promise<void>; // פונקציה לעדכון מתכון מועדף
+  toggleCategoryFilter: (categoryId: string) => void; // פונקציה לסינון לפי קטגוריות
+  filterRecipesBySearch: (searchTerm: string) => void; // פונקציה לסינון לפי מונח חיפוש
 }
 
 const useRecipeStore = create<RecipeStore>((set, get) => ({
@@ -26,19 +27,17 @@ const useRecipeStore = create<RecipeStore>((set, get) => ({
   favoriteRecipes: [],
   loading: true,
   error: null,
-  searchTerm: '', // Initialize searchTerm with an empty string
+  searchTerm: '',
 
   fetchData: async () => {
     try {
       set({ loading: true, error: null });
 
-      // Fetch categories
       const fetchedCategories = await getAllCategories();
       const categoryObjects = fetchedCategories.map(
         (category: any) => new CategoryModel(category._id, category.name)
       );
 
-      // Fetch recipes and map to RecipeModel with categoryName
       const fetchedRecipes = await getAllRecipes();
       const recipeObjects = fetchedRecipes.map((data: any) => {
         const category = categoryObjects.find((cat: { _id: any }) => cat._id === data.categoryId);
@@ -48,83 +47,88 @@ const useRecipeStore = create<RecipeStore>((set, get) => ({
         });
       });
 
-      const favoriteRecipes = recipeObjects.filter((recipe: { isFavorite: any }) => recipe.isFavorite);
-
       set({
         recipes: recipeObjects,
-        filteredRecipes: recipeObjects, // Initially show all recipes
+        filteredRecipes: recipeObjects,
         categories: categoryObjects,
-        favoriteRecipes,
+        favoriteRecipes: recipeObjects.filter((r) => r.isFavorite),
         loading: false,
       });
     } catch (error) {
       console.error(error);
-      set({ error: 'Failed to fetch data', loading: false });
+      set({ error: 'שגיאה בטעינת הנתונים', loading: false });
     }
   },
 
   toggleFavorite: async (recipe: RecipeModel) => {
-    const { recipes } = get();
+    const { recipes, selectedCategories, searchTerm } = get();
     try {
       const updatedRecipe = {
         ...recipe,
         isFavorite: !recipe.isFavorite,
       };
 
-      // Update on the server
       await updateRecipe(updatedRecipe);
 
-      // Update in the store
       const updatedRecipes = recipes.map((r) =>
         r._id === recipe._id ? updatedRecipe : r
       );
-      const updatedFavorites = updatedRecipes.filter((r) => r.isFavorite);
+
+      // סינון מחדש של כל הרשימות
+      const filteredRecipes = updatedRecipes.filter(
+        (r) =>
+          (selectedCategories.length === 0 || selectedCategories.includes(r.categoryId)) &&
+          r.mealName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
 
       set({
         recipes: updatedRecipes,
-        filteredRecipes: updatedRecipes.filter((recipe) =>
-          get().selectedCategories.length > 0
-            ? get().selectedCategories.includes(recipe.categoryId)
-            : true
-        ), // Update filtering based on selected categories
-        favoriteRecipes: updatedFavorites,
+        filteredRecipes,
+        favoriteRecipes: filteredRecipes.filter((r) => r.isFavorite),
       });
     } catch (error) {
-      console.error('Error toggling favorite status:', error);
-      set({ error: 'Failed to update favorite status' });
+      console.error('שגיאה בעדכון סטטוס מועדף:', error);
+      set({ error: 'שגיאה בעדכון סטטוס מועדף' });
     }
   },
 
   toggleCategoryFilter: (categoryId: string) => {
     const { selectedCategories, recipes, searchTerm } = get();
 
-    // Update selected categories
     const updatedCategories = selectedCategories.includes(categoryId)
       ? selectedCategories.filter((id) => id !== categoryId)
       : [...selectedCategories, categoryId];
 
-    // Update filtered recipes based on search term and selected categories
-    const filtered = recipes.filter(
+    const filteredRecipes = recipes.filter(
       (recipe) =>
         (updatedCategories.length === 0 || updatedCategories.includes(recipe.categoryId)) &&
         recipe.mealName.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    set({ selectedCategories: updatedCategories, filteredRecipes: filtered });
+    set({
+      selectedCategories: updatedCategories,
+      filteredRecipes,
+      favoriteRecipes: filteredRecipes.filter((r) => r.isFavorite),
+    });
   },
 
   filterRecipesBySearch: (searchTerm: string) => {
     const { recipes, selectedCategories } = get();
 
-    // Update filtered recipes based on search term and selected categories
-    const filtered = recipes.filter(
+    const filteredRecipes = recipes.filter(
       (recipe) =>
         recipe.mealName.toLowerCase().includes(searchTerm.toLowerCase()) &&
         (selectedCategories.length === 0 || selectedCategories.includes(recipe.categoryId))
     );
 
-    set({ searchTerm, filteredRecipes: filtered });
+    set({
+      searchTerm,
+      filteredRecipes,
+      favoriteRecipes: filteredRecipes.filter((r) => r.isFavorite),
+    });
   },
 }));
 
 export default useRecipeStore;
+
+

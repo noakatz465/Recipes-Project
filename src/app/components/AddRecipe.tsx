@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { recipeSchema } from '../zod/recipeSchema';
 import { addRecipe } from '../services/recipesService';
 import useRecipeStore from '../stores/recipeStore';
-import RecipeModel from '../models/recipeModel'; // Import the RecipeModel
+import RecipeModel from '../models/recipeModel'; // ייבוא המודל RecipeModel
 import { ZodError } from 'zod';
 import { useRouter } from 'next/navigation';
 
@@ -21,13 +21,15 @@ function AddRecipe() {
 
   const { categories, error, fetchData } = useRecipeStore();
 
+  // שליפת נתונים בעת טעינת הרכיב
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
+  // פונקציה לטיפול בשליחת הטופס
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrors({}); // Reset errors before validation
+    setErrors({}); // איפוס הודעות שגיאה לפני אימות
 
     try {
       const newRecipeData = new RecipeModel({
@@ -40,15 +42,15 @@ function AddRecipe() {
         ingredients,
       });
 
-      // Validate the data using Zod
+      // אימות הנתונים באמצעות Zod
       recipeSchema.parse(newRecipeData);
 
-      // Submit the recipe if validation passes
+      // שליחת המתכון אם האימות מצליח
       await addRecipe(newRecipeData);
       router.push('/pages/recipeList');
     } catch (err) {
       if (err instanceof ZodError) {
-        // Map Zod errors to the errors state
+        // מיפוי שגיאות Zod למצב ההודעות
         const fieldErrors: Record<string, string> = {};
         err.errors.forEach((error) => {
           if (error.path.length > 0) {
@@ -62,6 +64,7 @@ function AddRecipe() {
     }
   };
 
+  // הוספת רכיב חדש לרשימת הרכיבים
   const handleAddIngredient = () => {
     if (newIngredient.trim() !== '') {
       setIngredients((prev) => [...prev, newIngredient.trim()]);
