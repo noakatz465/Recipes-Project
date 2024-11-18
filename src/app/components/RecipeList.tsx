@@ -11,7 +11,7 @@ function RecipeList() {
   useEffect(() => {
     resetFilters(); // איפוס המסננים בעת טעינת הדף
     fetchData(); 
-  }, [fetchData]);
+  }, [fetchData,resetFilters]);
 
   if (error) {
     return <div>{error}</div>;

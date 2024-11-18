@@ -32,7 +32,5 @@ function Favourites() {
 }
 
 export default Favourites;
-function resetFilters() {
-  throw new Error('Function not implemented.');
-}
+
 
