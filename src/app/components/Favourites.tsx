@@ -4,10 +4,11 @@ import Recipe from './Recipe';
 import useRecipeStore from '../stores/recipeStore';
 
 function Favourites() {
-  const { favoriteRecipes, error, fetchData } = useRecipeStore();
+  const { favoriteRecipes, error, fetchData,resetFilters } = useRecipeStore();
 
   useEffect(() => {
     if (favoriteRecipes.length === 0) {
+      resetFilters(); // איפוס המסננים בעת טעינת הדף
       fetchData(); // Fetch data if favorite recipes are not loaded
     }
   }, [fetchData, favoriteRecipes.length]);
@@ -31,3 +32,7 @@ function Favourites() {
 }
 
 export default Favourites;
+function resetFilters() {
+  throw new Error('Function not implemented.');
+}
+

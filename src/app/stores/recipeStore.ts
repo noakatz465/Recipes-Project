@@ -17,6 +17,8 @@ interface RecipeStore {
   toggleFavorite: (recipe: RecipeModel) => Promise<void>; // פונקציה לעדכון מתכון מועדף
   toggleCategoryFilter: (categoryId: string) => void; // פונקציה לסינון לפי קטגוריות
   filterRecipesBySearch: (searchTerm: string) => void; // פונקציה לסינון לפי מונח חיפוש
+  resetFilters: () => void; // פונקציה לאיפוס סינונים
+
 }
 
 const useRecipeStore = create<RecipeStore>((set, get) => ({
@@ -60,6 +62,15 @@ const useRecipeStore = create<RecipeStore>((set, get) => ({
     }
   },
 
+  resetFilters: () => {
+    const { recipes } = get();
+    set({
+      selectedCategories: [],
+      searchTerm: '',
+      filteredRecipes: recipes,
+    });
+  },
+
   toggleFavorite: async (recipe: RecipeModel) => {
     const { recipes, selectedCategories, searchTerm } = get();
     try {
@@ -74,7 +85,6 @@ const useRecipeStore = create<RecipeStore>((set, get) => ({
         r._id === recipe._id ? updatedRecipe : r
       );
 
-      // סינון מחדש של כל הרשימות
       const filteredRecipes = updatedRecipes.filter(
         (r) =>
           (selectedCategories.length === 0 || selectedCategories.includes(r.categoryId)) &&
@@ -128,6 +138,7 @@ const useRecipeStore = create<RecipeStore>((set, get) => ({
     });
   },
 }));
+
 
 export default useRecipeStore;
 

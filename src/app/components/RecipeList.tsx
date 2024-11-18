@@ -6,9 +6,10 @@ import useRecipeStore from '../stores/recipeStore';
 import RecipeModel from '../models/recipeModel';
 
 function RecipeList() {
-  const { filteredRecipes, error, fetchData } = useRecipeStore();
+  const { filteredRecipes, error, fetchData ,resetFilters} = useRecipeStore();
 
   useEffect(() => {
+    resetFilters(); // איפוס המסננים בעת טעינת הדף
     fetchData(); 
   }, [fetchData]);
 
