@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { recipeSchema } from '../zod/recipeSchema';
 import { addRecipe } from '../services/recipesService';
 import useRecipeStore from '../stores/recipeStore';
-import RecipeModel from '../models/recipeModel'; // ייבוא המודל RecipeModel
+import RecipeModel from '../models/recipeModel';
 import { ZodError } from 'zod';
 import { useRouter } from 'next/navigation';
 

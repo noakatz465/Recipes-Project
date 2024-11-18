@@ -11,7 +11,7 @@ function Favourites() {
       resetFilters(); // איפוס המסננים בעת טעינת הדף
       fetchData(); // Fetch data if favorite recipes are not loaded
     }
-  }, [fetchData, favoriteRecipes.length]);
+  }, [fetchData, favoriteRecipes.length, resetFilters]);
 
   if (error) {
     return <div>{error}</div>;

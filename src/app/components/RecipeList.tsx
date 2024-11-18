@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import Recipe from './Recipe'; // Import the Recipe component
+import Recipe from './Recipe';
 import useRecipeStore from '../stores/recipeStore';
 import RecipeModel from '../models/recipeModel';
 

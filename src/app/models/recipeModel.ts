@@ -1,7 +1,7 @@
 export default class RecipeModel {
-  _id: string;
+  _id?: string;
   categoryId: string;
-  categoryName: string; // Added category name
+  categoryName?: string;
   description: string;
   mealName: string;
   img: string;
@@ -20,9 +20,9 @@ export default class RecipeModel {
     isFavorite = false,
     ingredients,
   }: {
-    _id: string;
+    _id?: string; 
     categoryId: string;
-    categoryName: string; // Accept category name
+    categoryName?: string;
     description: string;
     mealName: string;
     img: string;
