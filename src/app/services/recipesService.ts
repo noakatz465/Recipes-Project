@@ -1,6 +1,6 @@
 import axios from 'axios';
 import RecipeModel from '../models/recipeModel';
-const API_URL = 'http://localhost:3000/api/recipes';
+const API_URL = '/api/recipes';
 
 // פונקציה לקבלת כל המתכונים
 export const getAllRecipes = async () => {
