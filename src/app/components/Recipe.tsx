@@ -32,7 +32,7 @@ const Recipe: React.FC<RecipeProps> = ({ recipe }) => {
           <h2 className="font-bold text-lg text-gray-800">{recipe.mealName}</h2>
           <button
             onClick={handleFavoriteToggle} // הוספת אירוע לחיצה
-            className={recipe.isFavorite ? 'w-6 h-6' : 'w-5 h-5'} // גודל שונה
+            className={recipe.isFavorite ? 'w-6 h-6' : 'w-5 h-5'}
             title={recipe.isFavorite ? 'Favorite Recipe' : 'Not Favorite'}
           >
             {recipe.isFavorite ? (
@@ -64,7 +64,10 @@ const Recipe: React.FC<RecipeProps> = ({ recipe }) => {
         </p>
         <div className="mt-auto">
           <Link
-            href={`/pages/recipeView/${recipe._id}`}
+            href={{
+              pathname: `/pages/recipeView/${recipe._id}`, // רק ה-ID יופיע בנתיב
+              query: { recipe: JSON.stringify(recipe) }, // מעביר את כל האובייקט דרך ה-query
+            }}
             className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg w-full text-center block"
           >
             Read more

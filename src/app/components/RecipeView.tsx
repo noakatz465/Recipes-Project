@@ -1,47 +1,30 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import RecipeModel from '@/app/models/recipeModel';
-import { getRecipeById } from '@/app/services/recipesService';
 
 interface RecipeViewProps {
-  recipeId: string; // Do not modify this
-  onClose?: () => void; // Optional function to close the dialog
+  recipe: RecipeModel; // האובייקט שמועבר לפרופס
+  onClose?: () => void; // פונקציה  לסגירה
 }
 
-const RecipeView: React.FC<RecipeViewProps> = ({ recipeId }) => {
-  const [recipe, setRecipe] = useState<RecipeModel | null>(null);
-  const router = useRouter(); // Initialize the Next.js router
+const RecipeView: React.FC<RecipeViewProps> = ({ recipe, onClose }) => {
+  const router = useRouter(); 
 
-  useEffect(() => {
-    const fetchRecipe = async () => {
-      try {
-        const data = await getRecipeById(recipeId); // Fetch recipe by ID
-        setRecipe(new RecipeModel(data)); // Convert data to RecipeModel
-      } catch (error) {
-        console.error('Error fetching recipe:', error);
-      }
-    };
-    fetchRecipe();
-  }, [recipeId]);
-
-  // Navigate back to the recipesList page
+  // ניתוב חזרה לרשימת המתכונים או סגירת הדיאלוג
   const handleClose = () => {
-    router.push('/pages/recipeList'); // Navigate to the recipeList page
+    if (onClose) {
+      onClose();
+    } else {
+      router.push('/pages/recipeList'); 
+    }
   };
-
-  if (!recipe) {
-    return <div className="text-center text-gray-500">Loading...</div>;
-  }
 
   return (
     <div className="fixed inset-0 bg-gray-700 bg-opacity-50 flex justify-center items-center z-50">
-      {/* Dialog Container */}
-      <div
-        className="bg-white rounded-2xl shadow-lg max-w-4xl w-full p-6 relative overflow-y-auto max-h-[90vh]"
-      >
-        {/* Close Button Positioned Relatively to the Dialog */}
+      <div className="bg-white rounded-2xl shadow-lg max-w-4xl w-full p-6 relative overflow-y-auto max-h-[90vh]">
+        {/* כפתור סגירה */}
         <button
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl"
           onClick={handleClose}
@@ -49,7 +32,7 @@ const RecipeView: React.FC<RecipeViewProps> = ({ recipeId }) => {
           &times;
         </button>
 
-        {/* Recipe Details */}
+        {/* פרטי המתכון */}
         <img
           className="w-full h-64 object-cover rounded-md mb-4"
           src={recipe.img}
