@@ -17,6 +17,7 @@ interface RecipeStore {
   toggleFavorite: (recipe: RecipeModel) => Promise<void>; // פונקציה לעדכון מתכון מועדף
   toggleCategoryFilter: (categoryId: string) => void; // פונקציה לסינון לפי קטגוריות
   filterRecipesBySearch: (searchTerm: string) => void; // פונקציה לסינון לפי מונח חיפוש
+  resetFilters: () => void; // פונקציה לאיפוס סינונים
 }
 
 const useRecipeStore = create<RecipeStore>((set, get) => ({
@@ -126,7 +127,11 @@ const useRecipeStore = create<RecipeStore>((set, get) => ({
       filteredRecipes,
       favoriteRecipes: filteredRecipes.filter((r) => r.isFavorite),
     });
+
   },
+  resetFilters(){
+      
+  }
 }));
 
 export default useRecipeStore;
