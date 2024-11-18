@@ -17,8 +17,6 @@ interface RecipeStore {
   toggleFavorite: (recipe: RecipeModel) => Promise<void>; // פונקציה לעדכון מתכון מועדף
   toggleCategoryFilter: (categoryId: string) => void; // פונקציה לסינון לפי קטגוריות
   filterRecipesBySearch: (searchTerm: string) => void; // פונקציה לסינון לפי מונח חיפוש
-  resetFilters: () => void; // פונקציה לאיפוס סינונים
-
 }
 
 const useRecipeStore = create<RecipeStore>((set, get) => ({
@@ -37,12 +35,12 @@ const useRecipeStore = create<RecipeStore>((set, get) => ({
 
       const fetchedCategories = await getAllCategories();
       const categoryObjects = fetchedCategories.map(
-        (category: any) => new CategoryModel(category._id, category.name)
+        (category: CategoryModel) => new CategoryModel(category._id, category.name)
       );
 
       const fetchedRecipes = await getAllRecipes();
-      const recipeObjects = fetchedRecipes.map((data: any) => {
-        const category = categoryObjects.find((cat: { _id: any }) => cat._id === data.categoryId);
+      const recipeObjects = fetchedRecipes.map((data: RecipeModel) => {
+        const category = categoryObjects.find((cat: { _id: string }) => cat._id === data.categoryId);
         return new RecipeModel({
           ...data,
           categoryName: category ? category.name : 'Unknown',
@@ -53,22 +51,13 @@ const useRecipeStore = create<RecipeStore>((set, get) => ({
         recipes: recipeObjects,
         filteredRecipes: recipeObjects,
         categories: categoryObjects,
-        favoriteRecipes: recipeObjects.filter((r) => r.isFavorite),
+        favoriteRecipes: recipeObjects.filter((r: RecipeModel) => r.isFavorite),
         loading: false,
       });
     } catch (error) {
       console.error(error);
       set({ error: 'שגיאה בטעינת הנתונים', loading: false });
     }
-  },
-
-  resetFilters: () => {
-    const { recipes } = get();
-    set({
-      selectedCategories: [],
-      searchTerm: '',
-      filteredRecipes: recipes,
-    });
   },
 
   toggleFavorite: async (recipe: RecipeModel) => {
@@ -85,6 +74,7 @@ const useRecipeStore = create<RecipeStore>((set, get) => ({
         r._id === recipe._id ? updatedRecipe : r
       );
 
+      // סינון מחדש של כל הרשימות
       const filteredRecipes = updatedRecipes.filter(
         (r) =>
           (selectedCategories.length === 0 || selectedCategories.includes(r.categoryId)) &&
@@ -138,7 +128,6 @@ const useRecipeStore = create<RecipeStore>((set, get) => ({
     });
   },
 }));
-
 
 export default useRecipeStore;
 
