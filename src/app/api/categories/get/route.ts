@@ -2,7 +2,7 @@ import connect from '@/app/lib/db/mongoDB';
 import Category from '@/app/lib/models/CategorySchema';
 import { NextResponse } from 'next/server';
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     await connect();
 
